@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>CWF Fintech | แดชบอร์ดกองทุน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    :root { 
+      --fintech-primary: #0F172A;   /* สีน้ำเงินเข้มแบบแอปการเงิน */
+      --fintech-accent: #3B82F6;    /* สีฟ้าสว่าง */
+      --fintech-success: #10B981; 
+      --bg-color: #F8FAFC; 
+    }
+    body { background-color: var(--bg-color); font-family: 'Prompt', sans-serif; overflow-x: hidden; padding-bottom: 80px; }
+
+    /* 🏦 Fintech Header */
+    .fintech-header { background: linear-gradient(135deg, var(--fintech-primary), #1E293B); color: white; padding: 40px 20px 60px 20px; border-bottom-left-radius: 32px; border-bottom-right-radius: 32px; position: relative; }
+    .network-badge { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(5px); }
+    .balance-label { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 25px; margin-bottom: 5px; }
+    .balance-amount { font-size: 2.8rem; font-weight: 700; letter-spacing: -1px; line-height: 1; margin-bottom: 0; }
+    .currency { font-size: 1.2rem; font-weight: 400; color: var(--fintech-success); }
+
+    /* ⚡ Quick Actions (ลอยทับ Header) */
+    .quick-actions { display: flex; justify-content: space-between; padding: 0 25px; margin-top: -35px; position: relative; z-index: 10; }
+    .action-btn { background: white; width: 65px; height: 65px; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-decoration: none; color: var(--fintech-primary); transition: 0.2s; border: none; }
+    .action-btn:active { transform: scale(0.95); }
+    .action-btn i { font-size: 1.5rem; margin-bottom: 4px; color: var(--fintech-accent); }
+    .action-btn span { font-size: 0.7rem; font-weight: 600; }
+
+    /* 📊 Overview Cards */
+    .dashboard-section { padding: 25px 20px; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--fintech-primary); margin-bottom: 15px; }
+    
+    .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .stat-card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #F1F5F9; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 15px; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--fintech-primary); margin-bottom: 2px; }
+    .stat-label { font-size: 0.8rem; color: #64748B; font-weight: 500; }
+
+    /* 📜 Transaction List (แทนที่ตาราง) */
+    .transaction-item { background: white; padding: 16px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #F1F5F9; }
+    .tx-icon { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: #FFFBEB; color: #D97706; }
+    .tx-details { flex-grow: 1; padding: 0 15px; }
+    .tx-name { font-weight: 700; color: var(--fintech-primary); font-size: 0.95rem; margin-bottom: 2px; }
+    .tx-type { font-size: 0.75rem; color: #64748B; }
+    .tx-amount { text-align: right; }
+    .tx-val { font-weight: 700; font-size: 0.95rem; color: var(--fintech-primary); }
+    .tx-status { font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #FEF3C7; color: #D97706; display: inline-block; margin-top: 4px; }
+
+    /* 📱 Bottom Navigation */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; height: 75px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); border-top-left-radius: 24px; border-top-right-radius: 24px; z-index: 1000; padding-bottom: 10px; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #94A3B8; text-decoration: none; font-size: 0.7rem; font-weight: 500; gap: 4px; }
+    .nav-item.active { color: var(--fintech-accent); }
+    .nav-item i { font-size: 1.4rem; transition: 0.2s; }
+    .nav-item.active i { transform: translateY(-3px); }
+
+    /* ⚙️ Loader */
+    #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--fintech-primary); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+  </style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+  <h5 class="fw-bold">CWF Fintech</h5>
+  <p class="small text-white-50">กำลังเชื่อมต่อข้อมูลความปลอดภัย...</p>
+</div>
+
+<div id="mainApp" style="display: none;">
+  
+  <!-- 🏦 Header Bank Style -->
+  <div class="fintech-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="network-badge">
+          <i class="fa-solid fa-shield-halved text-success"></i> 
+          <span id="displayNetworkName">กำลังโหลด...</span>
+        </div>
+      </div>
+      <i class="fa-regular fa-bell fs-5 text-white-50"></i>
+    </div>
+    
+    <p class="balance-label">เงินสมทบสะสมรวม (บาท)</p>
+    <h1 class="balance-amount"><span id="statContrib">0.00</span> <span class="currency">฿</span></h1>
+  </div>
+
+  <!-- ⚡ Quick Actions -->
+  <div class="quick-actions">
+    <button class="action-btn" onclick="loadDashboardData()">
+      <i class="fa-solid fa-arrows-rotate"></i>
+      <span>อัปเดต</span>
+    </button>
+    <button class="action-btn" onclick="openRawDatabase()">
+      <i class="fa-solid fa-file-excel"></i>
+      <span>ฐานข้อมูล</span>
+    </button>
+    <button class="action-btn">
+      <i class="fa-solid fa-user-plus"></i>
+      <span>เพิ่มสมาชิก</span>
+    </button>
+    <button class="action-btn text-danger" onclick="logout()">
+      <i class="fa-solid fa-power-off text-danger"></i>
+      <span class="text-danger">ออก</span>
+    </button>
+  </div>
+
+  <!-- 📊 Overview -->
+  <div class="dashboard-section mt-3">
+    <h3 class="section-title">ภาพรวมกองทุน</h3>
+    <div class="grid-cards">
+      <div class="stat-card">
+        <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value" id="statMembers">0</div>
+        <div class="stat-label">สมาชิกทั้งหมด (คน)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fa-solid fa-hand-holding-medical"></i></div>
+        <div class="stat-value" id="statWelfare">0</div>
+        <div class="stat-label">สวัสดิการที่จ่าย (บาท)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📜 Pending Transactions -->
+  <div class="dashboard-section pt-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="section-title mb-0">รายการรอตรวจสอบ</h3>
+      <span class="badge bg-danger rounded-pill px-3" id="statPendingBadge">0 รายการ</span>
+    </div>
+    
+    <!-- พื้นที่แสดงผลรายการแบบมือถือ (List View) -->
+    <div id="pendingListContainer">
+      <div class="text-center py-4 text-muted small">
+        <div class="spinner-border spinner-border-sm mb-2"></div><br>กำลังดึงข้อมูล...
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 📱 Bottom Navigation -->
+<div class="bottom-nav">
+  <a href="#" class="nav-item active">
+    <i class="fa-solid fa-house"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="#" class="nav-item">
+    <i class="fa-solid fa-wallet"></i>
+    <span>สมทบ</span>
+  </a>
+  <a href="#" class="nav-item">
+    <i class="fa-solid fa-clipboard-check"></i>
+    <span>อนุมัติ</span>
+  </a>
+  <a href="#" class="nav-item" onclick="openRawDatabase()">
+    <i class="fa-solid fa-table"></i>
+    <span>หลังบ้าน</span>
+  </a>
+</div>
+
+<script>
+  const LOCAL_API_URL = localStorage.getItem("cwf_local_api");
+  const NETWORK_NAME = localStorage.getItem("cwf_network_name");
+  const SHEET_ID = localStorage.getItem("cwf_sheet_id");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!LOCAL_API_URL || !NETWORK_NAME) {
+      window.location.href = "universal_login.html";
+      return;
+    }
+    document.getElementById('displayNetworkName').innerText = NETWORK_NAME;
+    loadDashboardData();
+  });
+
+  async function loadDashboardData() {
+    try {
+      const res = await fetch(LOCAL_API_URL, { 
+        method: 'POST', body: JSON.stringify({ action: 'getAdminDashboard' }) 
+      }).then(r => r.json());
+
+      if (res.status === 'success') {
+        // อัปเดตตัวเลข
+        document.getElementById('statMembers').innerText = (res.data.totalMembers || 0).toLocaleString();
+        document.getElementById('statContrib').innerText = (res.data.totalContributions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('statWelfare').innerText = (res.data.totalWelfare || 0).toLocaleString();
+        document.getElementById('statPendingBadge').innerText = (res.data.pendingCount || 0) + " รายการ";
+
+        // สร้าง Transaction List
+        let html = "";
+        if (!res.data.pendingRequests || res.data.pendingRequests.length === 0) {
+          html = `
+            <div class="text-center py-5">
+              <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <h6 class="fw-bold text-dark">เยี่ยมมาก! ไม่มีรายการค้าง</h6>
+              <p class="text-muted small">ข้อมูลกองทุนของคุณเป็นปัจจุบันแล้ว</p>
+            </div>`;
+        } else {
+          res.data.pendingRequests.forEach(req => {
+            // เช็คไอคอนตามประเภทรายการ
+            let iconCode = req.type.includes("สมาชิก") ? '<i class="fa-solid fa-user-plus"></i>' : 
+                           req.type.includes("สวัสดิการ") ? '<i class="fa-solid fa-hand-holding-medical"></i>' : 
+                           '<i class="fa-solid fa-file-invoice-dollar"></i>';
+                           
+            html += `
+              <div class="transaction-item" onclick="openRawDatabase()">
+                <div class="tx-icon">${iconCode}</div>
+                <div class="tx-details">
+                  <div class="tx-name">${req.name}</div>
+                  <div class="tx-type">${req.type} • ${req.date}</div>
+                </div>
+                <div class="tx-amount">
+                  <div class="tx-val">${parseFloat(req.amount).toLocaleString()} ฿</div>
+                  <div class="tx-status">รอตรวจสอบ</div>
+                </div>
+              </div>
+            `;
+          });
+        }
+        document.getElementById('pendingListContainer').innerHTML = html;
+        
+        // ปิดหน้าโหลด แสดงแอป
+        setTimeout(() => {
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('mainApp').style.display = 'block';
+        }, 500); // ดีเลย์นิดนึงให้ดูพรีเมียม
+
+      } else { throw new Error("API Error"); }
+    } catch (err) {
+      document.getElementById('loader').innerHTML = `
+        <i class="fa-solid fa-triangle-exclamation text-warning fs-1 mb-3"></i>
+        <h5 class="fw-bold">ไม่สามารถดึงข้อมูลได้</h5>
+        <button class="btn btn-outline-light mt-3 rounded-pill px-4" onclick="openRawDatabase()">ไปที่ฐานข้อมูล (Sheets)</button>
+      `;
+    }
+  }
+
+  function openRawDatabase() { window.open(`https://docs.google.com/spreadsheets/d/${SHEET_ID}`, '_blank'); }
+  function logout() { localStorage.clear(); window.location.href = "universal_login.html"; }
+</script>
+</body>
+</html>
