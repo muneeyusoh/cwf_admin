@@ -3,103 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ระบบขึ้นทะเบียนเครือข่ายสวัสดิการ (MOU)</title>
+  <title>CWF System Factory | ศูนย์ผลิตระบบ</title>
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <style>
     body { background-color: #F8FAFC; font-family: 'Prompt', sans-serif; color: #1E293B; }
-    
-    .header { background: linear-gradient(135deg, #0F172A, #10B981); color: white; padding: 40px 20px 80px; text-align: center; border-radius: 0 0 24px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    
+    .header { background: linear-gradient(135deg, #0F172A, #2563EB); color: white; padding: 40px 20px 80px; text-align: center; border-radius: 0 0 24px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     .admin-card { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); max-width: 600px; margin: -50px auto 30px; position: relative; }
-    
-    .form-control { border-radius: 12px; padding: 14px 16px; background-color: #F1F5F9; border: 1px solid #CBD5E1; font-weight: 500; }
-    .form-control:focus { background-color: #FFFFFF; border-color: #10B981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
-    
-    .btn-create { background-color: #10B981; color: white; border-radius: 14px; padding: 16px; font-weight: 700; font-size: 1.05rem; border: none; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .form-control { border-radius: 12px; padding: 14px 16px; background-color: #F8FAFC; border: 1px solid #CBD5E1; font-weight: 500; }
+    .form-control:focus { background-color: #FFFFFF; border-color: #2563EB; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); }
+    .btn-create { background-color: #2563EB; color: white; border-radius: 14px; padding: 16px; font-weight: 700; font-size: 1.05rem; border: none; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
     .btn-create:active { transform: scale(0.98); }
-    
-    .btn-add-center { border: 2px dashed #10B981; color: #10B981; background: transparent; border-radius: 12px; padding: 10px; width: 100%; font-weight: 600; transition: 0.2s; }
-    .btn-add-center:hover, .btn-add-center:active { background: #ecfdf5; }
-    
+    .btn-add-center { border: 2px dashed #2563EB; color: #2563EB; background: transparent; border-radius: 12px; padding: 10px; width: 100%; font-weight: 600; transition: 0.2s; }
+    .btn-add-center:hover, .btn-add-center:active { background: #EFF6FF; }
     .center-input-group { animation: slideDown 0.3s ease-out; }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
-
 <div class="header">
-  <h3 class="fw-bold mb-1"><i class="fa-solid fa-handshake me-2"></i>MOU Registration</h3>
-  <p class="text-white-50">ระบบลงทะเบียนและสร้างฐานข้อมูลกองทุนอัตโนมัติ</p>
+  <h3 class="fw-bold mb-1"><i class="fa-solid fa-industry me-2"></i>CWF System Factory</h3>
+  <p class="text-white-50">ศูนย์กลางโคลนฐานข้อมูลสำหรับกองทุนสวัสดิการเครือข่าย</p>
 </div>
 
 <div class="container px-3">
-  
   <div class="admin-card">
     <div class="text-center mb-4">
-      <h5 class="fw-bold text-dark">ลงทะเบียนเครือข่ายใหม่</h5>
-      <p class="text-muted small">ระบบจะตรวจสอบข้อมูลซ้ำ และส่งสิทธิ์ใช้งานผ่านอีเมล</p>
+      <h5 class="fw-bold text-dark">สร้างระบบให้กองทุนใหม่ (Provisioning)</h5>
+      <p class="text-muted small">ระบบจะคัดลอก Template สร้างตู้เซฟใบใหม่ให้แบบอัตโนมัติ</p>
     </div>
     
     <form id="provisionForm" onsubmit="handleProvisioning(event)">
       <div class="mb-3">
         <label class="small text-muted fw-bold mb-1 ms-1">1. ชื่อกองทุน / ตำบล</label>
-        <input type="text" class="form-control fw-bold text-primary" name="networkName" placeholder="เช่น เทศบาลตำบลสุคิริน" required>
+        <input type="text" class="form-control fw-bold text-primary" name="networkName" placeholder="เช่น เทศบาลตำบลมาโมง" required>
       </div>
-
       <div class="mb-3">
         <label class="small text-muted fw-bold mb-1 ms-1">2. รหัสทะเบียน พอช.</label>
-        <input type="text" class="form-control fw-bold text-danger" name="codiCode" placeholder="ระบุรหัส พอช. เพื่อป้องกันข้อมูลซ้ำ" required>
+        <input type="text" class="form-control fw-bold text-danger" name="codiCode" placeholder="รหัส พอช. 10 หลัก" required>
       </div>
-      
       <div class="mb-4">
-        <label class="small text-muted fw-bold mb-1 ms-1">3. อีเมลประธานกองทุน (Gmail)</label>
-        <input type="email" class="form-control" name="adminEmail" placeholder="เช่น admin@gmail.com (สำหรับรับลิงก์ยืนยัน)" required>
+        <label class="small text-muted fw-bold mb-1 ms-1">3. อีเมลประธานกองทุน / แอดมิน (Gmail)</label>
+        <input type="email" class="form-control" name="adminEmail" placeholder="เช่น president@gmail.com (สำหรับให้สิทธิ์เข้าไฟล์)" required>
       </div>
       
       <hr class="my-4 border-light">
       
       <div class="mb-4">
-        <label class="small text-muted fw-bold mb-2 ms-1">4. โครงสร้างศูนย์ประสานงาน / หมู่บ้าน</label>
-        
+        <label class="small text-muted fw-bold mb-2 ms-1">4. กำหนดชื่อศูนย์ประสานงาน / หมู่บ้าน</label>
         <div id="centersContainer">
           <div class="input-group mb-2 center-input-group">
             <span class="input-group-text bg-light border-0"><i class="fa-solid fa-location-dot text-muted"></i></span>
-            <input type="text" class="form-control center-input" placeholder="ระบุชื่อศูนย์ประสานงานที่ 1" required>
+            <input type="text" class="form-control center-input" placeholder="ศูนย์ประสานงานที่ 1" required>
           </div>
         </div>
-        
         <button type="button" class="btn-add-center mt-2" onclick="addCenterField()">
           <i class="fa-solid fa-plus me-1"></i> เพิ่มศูนย์ประสานงาน
         </button>
       </div>
       
-      <button type="submit" class="btn-create" id="btnCreate"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> บันทึก MOU และส่งอีเมลยืนยัน</button>
+      <button type="submit" class="btn-create" id="btnCreate"><i class="fa-solid fa-hammer me-2"></i> สั่งผลิตฐานข้อมูล</button>
     </form>
   </div>
-
 </div>
 
 <script>
-  // ⚠️ 1. ใส่ URL ของ API Web App ระบบกลาง (Master Hub) ตรงนี้
+  // ⚠️ นำ Web App URL ของ "CWF_Master_Hub" มาใส่ตรงนี้ครับ
   const CENTRAL_API_URL = "https://script.google.com/macros/s/AKfycbwG-iVeDmIPxFaqy1GRk9j0PtPljQSllQt2bqP7q8U3E2zbPGzojxvDCQuGYXpNmZQW/exec";
 
   function addCenterField() {
     const container = document.getElementById('centersContainer');
     const div = document.createElement('div');
     div.className = 'input-group mb-2 center-input-group';
-    
     div.innerHTML = `
       <span class="input-group-text bg-light border-0"><i class="fa-solid fa-location-dot text-muted"></i></span>
-      <input type="text" class="form-control center-input" placeholder="ระบุชื่อศูนย์ประสานงาน" required>
-      <button class="btn btn-danger px-3 border-0" type="button" onclick="this.parentElement.remove()" title="ลบศูนย์นี้">
+      <input type="text" class="form-control center-input" placeholder="ชื่อศูนย์ประสานงาน" required>
+      <button class="btn btn-danger px-3 border-0" type="button" onclick="this.parentElement.remove()">
         <i class="fa-solid fa-trash"></i>
       </button>
     `;
@@ -110,41 +93,52 @@
     e.preventDefault();
     const btn = document.getElementById('btnCreate');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>ระบบกำลังสร้างฐานข้อมูลและส่งอีเมล...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>ระบบกำลังสร้างฐานข้อมูล... (ประมาณ 10 วินาที)';
     
     const payload = Object.fromEntries(new FormData(e.target).entries());
     payload.action = "provisionNetwork"; 
     
     const centerInputs = document.querySelectorAll('.center-input');
-    const centersArray = Array.from(centerInputs)
-                              .map(input => input.value.trim()) 
-                              .filter(val => val !== ""); 
-    
-    payload.centersList = centersArray.join(',');
+    payload.centersList = Array.from(centerInputs).map(input => input.value.trim()).filter(val => val !== "").join(',');
     
     try {
-      const res = await fetch(CENTRAL_API_URL, { 
-        method: "POST", 
-        body: JSON.stringify(payload) 
-      }).then(r=>r.json());
+      const res = await fetch(CENTRAL_API_URL, { method: "POST", body: JSON.stringify(payload) }).then(r=>r.json());
       
       if (res.status === 'success') {
         Swal.fire({
-          title: 'ลงทะเบียนและส่งอีเมลสำเร็จ!',
-          html: res.message,
+          title: 'ผลิตระบบสำเร็จ!',
+          html: `
+            <div class="text-start mt-3">
+              <p>ระบบสร้างไฟล์ Google Sheets ชื่อ <b>CWF_DB_${res.networkName}</b> ให้เรียบร้อยแล้ว</p>
+              <div class="alert alert-info border-0 p-3 mt-3">
+                <b>ขั้นตอนต่อไปสำหรับผู้พัฒนา:</b><br>
+                1. กดปุ่มสีเขียวด้านล่างเพื่อเปิดไฟล์ฐานข้อมูลที่เพิ่งสร้าง<br>
+                2. ไปที่ <i>ส่วนขยาย > Apps Script</i><br>
+                3. กด <i>Deploy > การทำให้ใช้งานได้รายการใหม่</i> (สิทธิ์: ทุกคน)<br>
+                4. นำลิงก์ API ไปใส่ใน <code>config.js</code> ของ GitHub
+              </div>
+            </div>
+          `,
           icon: 'success',
-          confirmButtonColor: '#10B981'
-        }).then(() => {
+          showCancelButton: true,
+          confirmButtonColor: '#10B981',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: '<i class="fa-solid fa-file-excel me-1"></i> เปิดฐานข้อมูล',
+          cancelButtonText: 'ปิดหน้าต่าง'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open(res.fileUrl, '_blank');
+          }
           window.location.reload(); 
         });
       } else {
         Swal.fire('ข้อผิดพลาด', res.message, 'warning');
       }
     } catch (err) {
-      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อระบบกลางได้', 'error');
+      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อ Factory API ได้', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles me-2"></i> บันทึก MOU และส่งอีเมลยืนยัน';
+      btn.innerHTML = '<i class="fa-solid fa-hammer me-2"></i> สั่งผลิตฐานข้อมูล';
     }
   }
 </script>
