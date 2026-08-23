@@ -10,6 +10,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
+  <!-- 🚀 โหลด Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
   <style>
     :root { 
       --fintech-primary: #0F172A;   /* สีน้ำเงินเข้มแบบแอปการเงิน */
@@ -43,7 +47,7 @@
     .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--fintech-primary); margin-bottom: 2px; }
     .stat-label { font-size: 0.8rem; color: #64748B; font-weight: 500; }
 
-    /* 📜 Transaction List (แทนที่ตาราง) */
+    /* 📜 Transaction List */
     .transaction-item { background: white; padding: 16px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #F1F5F9; }
     .tx-icon { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: #FFFBEB; color: #D97706; }
     .tx-details { flex-grow: 1; padding: 0 15px; }
@@ -69,7 +73,7 @@
 <div id="loader">
   <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
   <h5 class="fw-bold">CWF Fintech</h5>
-  <p class="small text-white-50">กำลังเชื่อมต่อข้อมูลความปลอดภัย...</p>
+  <p class="small text-white-50">กำลังเชื่อมต่อตู้เซฟ Firestore...</p>
 </div>
 
 <div id="mainApp" style="display: none;">
@@ -80,7 +84,7 @@
       <div>
         <div class="network-badge">
           <i class="fa-solid fa-shield-halved text-success"></i> 
-          <span id="displayNetworkName">กำลังโหลด...</span>
+          <span id="displayNetworkName">เทศบาลตำบลสุคิริน</span>
         </div>
       </div>
       <i class="fa-regular fa-bell fs-5 text-white-50"></i>
@@ -96,15 +100,11 @@
       <i class="fa-solid fa-arrows-rotate"></i>
       <span>อัปเดต</span>
     </button>
-    <button class="action-btn" onclick="openRawDatabase()">
-      <i class="fa-solid fa-file-excel"></i>
-      <span>ฐานข้อมูล</span>
+    <button class="action-btn" onclick="window.open('https://console.firebase.google.com/u/0/project/smartwelf-f7d81/firestore', '_blank')">
+      <i class="fa-solid fa-database"></i>
+      <span>ตู้เซฟข้อมูล</span>
     </button>
-    <button class="action-btn">
-      <i class="fa-solid fa-user-plus"></i>
-      <span>เพิ่มสมาชิก</span>
-    </button>
-    <button class="action-btn text-danger" onclick="logout()">
+    <button class="action-btn text-danger" onclick="alert('ฟีเจอร์นี้สงวนไว้สำหรับกรรมการ')">
       <i class="fa-solid fa-power-off text-danger"></i>
       <span class="text-danger">ออก</span>
     </button>
@@ -122,7 +122,7 @@
       <div class="stat-card">
         <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fa-solid fa-hand-holding-medical"></i></div>
         <div class="stat-value" id="statWelfare">0</div>
-        <div class="stat-label">สวัสดิการที่จ่าย (บาท)</div>
+        <div class="stat-label">สวัสดิการที่ขอเบิก (รายการ)</div>
       </div>
     </div>
   </div>
@@ -137,7 +137,7 @@
     <!-- พื้นที่แสดงผลรายการแบบมือถือ (List View) -->
     <div id="pendingListContainer">
       <div class="text-center py-4 text-muted small">
-        <div class="spinner-border spinner-border-sm mb-2"></div><br>กำลังดึงข้อมูล...
+        <div class="spinner-border spinner-border-sm mb-2"></div><br>กำลังดึงข้อมูลจาก Firestore...
       </div>
     </div>
   </div>
@@ -158,92 +158,112 @@
     <i class="fa-solid fa-clipboard-check"></i>
     <span>อนุมัติ</span>
   </a>
-  <a href="#" class="nav-item" onclick="openRawDatabase()">
-    <i class="fa-solid fa-table"></i>
-    <span>หลังบ้าน</span>
+  <a href="https://console.firebase.google.com/u/0/project/smartwelf-f7d81/firestore" target="_blank" class="nav-item">
+    <i class="fa-solid fa-server"></i>
+    <span>ฐานข้อมูล</span>
   </a>
 </div>
 
 <script>
-  const LOCAL_API_URL = localStorage.getItem("cwf_local_api");
-  const NETWORK_NAME = localStorage.getItem("cwf_network_name");
-  const SHEET_ID = localStorage.getItem("cwf_sheet_id");
+  // 🔑 ใส่กุญแจ Firebase ของคุณ
+  const firebaseConfig = {
+    apiKey: "AIzaSyBs1G5k31100g6PeVvU5nUyz0QDB21jHpI",
+    authDomain: "smartwelf-f7d81.firebaseapp.com",
+    projectId: "smartwelf-f7d81",
+    storageBucket: "smartwelf-f7d81.firebasestorage.app",
+    messagingSenderId: "114126831149",
+    appId: "1:114126831149:web:66ea766f6c558b159442a4",
+    measurementId: "G-LGGQC7R7E1"
+  };
+
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
 
   document.addEventListener("DOMContentLoaded", () => {
-    if (!LOCAL_API_URL || !NETWORK_NAME) {
-      window.location.href = "universal_login.html";
-      return;
-    }
-    document.getElementById('displayNetworkName').innerText = NETWORK_NAME;
     loadDashboardData();
   });
 
   async function loadDashboardData() {
     try {
-      const res = await fetch(LOCAL_API_URL, { 
-        method: 'POST', body: JSON.stringify({ action: 'getAdminDashboard' }) 
-      }).then(r => r.json());
+      // 🚀 1. นับจำนวนสมาชิกทั้งหมด
+      const membersSnap = await db.collection("members").get();
+      document.getElementById('statMembers').innerText = membersSnap.size.toLocaleString();
+      
+      let totalMoney = 0;
+      membersSnap.forEach(doc => {
+          totalMoney += doc.data().totalContribution || 0;
+      });
+      document.getElementById('statContrib').innerText = totalMoney.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-      if (res.status === 'success') {
-        // อัปเดตตัวเลข
-        document.getElementById('statMembers').innerText = (res.data.totalMembers || 0).toLocaleString();
-        document.getElementById('statContrib').innerText = (res.data.totalContributions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        document.getElementById('statWelfare').innerText = (res.data.totalWelfare || 0).toLocaleString();
-        document.getElementById('statPendingBadge').innerText = (res.data.pendingCount || 0) + " รายการ";
+      // 🚀 2. ดึงรายการธุรกรรมที่ "รอตรวจสอบ"
+      let pendingListHtml = "";
+      let pendingCount = 0;
+      
+      // ดึงรายการสมทบเงิน (Transactions)
+      const transSnap = await db.collection("transactions").where("status", "==", "รอตรวจสอบ").get();
+      transSnap.forEach(doc => {
+          pendingCount++;
+          const req = doc.data();
+          pendingListHtml += createListItem('<i class="fa-solid fa-file-invoice-dollar"></i>', req.fullName, req.type, req.amount);
+      });
+      
+      // ดึงรายการขอเบิกสวัสดิการ (Claims)
+      const claimsSnap = await db.collection("claims").where("status", "==", "รอตรวจสอบ").get();
+      document.getElementById('statWelfare').innerText = claimsSnap.size.toLocaleString(); // โชว์จำนวนรายการเคลมรวม
+      
+      claimsSnap.forEach(doc => {
+          pendingCount++;
+          const req = doc.data();
+          pendingListHtml += createListItem('<i class="fa-solid fa-hand-holding-medical"></i>', req.fullName, req.welfareType, req.claimAmount);
+      });
+      
+      document.getElementById('statPendingBadge').innerText = pendingCount + " รายการ";
 
-        // สร้าง Transaction List
-        let html = "";
-        if (!res.data.pendingRequests || res.data.pendingRequests.length === 0) {
-          html = `
-            <div class="text-center py-5">
-              <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
-                <i class="fa-solid fa-check"></i>
-              </div>
-              <h6 class="fw-bold text-dark">เยี่ยมมาก! ไม่มีรายการค้าง</h6>
-              <p class="text-muted small">ข้อมูลกองทุนของคุณเป็นปัจจุบันแล้ว</p>
-            </div>`;
-        } else {
-          res.data.pendingRequests.forEach(req => {
-            // เช็คไอคอนตามประเภทรายการ
-            let iconCode = req.type.includes("สมาชิก") ? '<i class="fa-solid fa-user-plus"></i>' : 
-                           req.type.includes("สวัสดิการ") ? '<i class="fa-solid fa-hand-holding-medical"></i>' : 
-                           '<i class="fa-solid fa-file-invoice-dollar"></i>';
-                           
-            html += `
-              <div class="transaction-item" onclick="openRawDatabase()">
-                <div class="tx-icon">${iconCode}</div>
-                <div class="tx-details">
-                  <div class="tx-name">${req.name}</div>
-                  <div class="tx-type">${req.type} • ${req.date}</div>
-                </div>
-                <div class="tx-amount">
-                  <div class="tx-val">${parseFloat(req.amount).toLocaleString()} ฿</div>
-                  <div class="tx-status">รอตรวจสอบ</div>
-                </div>
-              </div>
-            `;
-          });
-        }
-        document.getElementById('pendingListContainer').innerHTML = html;
-        
-        // ปิดหน้าโหลด แสดงแอป
-        setTimeout(() => {
-          document.getElementById('loader').style.display = 'none';
-          document.getElementById('mainApp').style.display = 'block';
-        }, 500); // ดีเลย์นิดนึงให้ดูพรีเมียม
+      if (pendingCount === 0) {
+        pendingListHtml = `
+          <div class="text-center py-5">
+            <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h6 class="fw-bold text-dark">เยี่ยมมาก! ไม่มีรายการค้าง</h6>
+            <p class="text-muted small">ข้อมูลกองทุนของคุณเป็นปัจจุบันแล้ว</p>
+          </div>`;
+      }
+      
+      document.getElementById('pendingListContainer').innerHTML = pendingListHtml;
+      
+      // ปิดหน้าโหลด แสดงแอป
+      setTimeout(() => {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+      }, 500);
 
-      } else { throw new Error("API Error"); }
     } catch (err) {
       document.getElementById('loader').innerHTML = `
         <i class="fa-solid fa-triangle-exclamation text-warning fs-1 mb-3"></i>
         <h5 class="fw-bold">ไม่สามารถดึงข้อมูลได้</h5>
-        <button class="btn btn-outline-light mt-3 rounded-pill px-4" onclick="openRawDatabase()">ไปที่ฐานข้อมูล (Sheets)</button>
+        <button class="btn btn-outline-light mt-3 rounded-pill px-4" onclick="location.reload()">ลองใหม่อีกครั้ง</button>
       `;
     }
   }
 
-  function openRawDatabase() { window.open(`https://docs.google.com/spreadsheets/d/${SHEET_ID}`, '_blank'); }
-  function logout() { localStorage.clear(); window.location.href = "universal_login.html"; }
+  function createListItem(iconHtml, name, type, amount) {
+      return `
+        <div class="transaction-item" onclick="window.open('https://console.firebase.google.com/u/0/project/smartwelf-f7d81/firestore', '_blank')">
+          <div class="tx-icon">${iconHtml}</div>
+          <div class="tx-details">
+            <div class="tx-name">${name || "ไม่มีชื่อ"}</div>
+            <div class="tx-type">${type}</div>
+          </div>
+          <div class="tx-amount">
+            <div class="tx-val">${parseFloat(amount || 0).toLocaleString()} ฿</div>
+            <div class="tx-status">รอตรวจสอบ</div>
+          </div>
+        </div>
+      `;
+  }
 </script>
 </body>
 </html>
